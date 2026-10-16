@@ -680,6 +680,57 @@ export function createJobScoutMcpServer() {
     try { const run = await previewDecision(a.recipe, a.positionId, a.fresh); return text(run, run.status !== "ok"); }
     catch { return text({ error: "Jev could not run this preview. Check the saved settings, request budget and available source material." }, true); }
   });
+
+  server.registerTool(
+    "screen_recruiter_threat",
+    {
+      title: "Screen recruiter threat",
+      description:
+        "Screen an inbound recruiter, email, domain, or message text against confirmed IOC threat blacklists, domain registration age (RDAP), disposable email detectors, and 'Contagious Interview' social engineering patterns.",
+      inputSchema: {
+        domainOrEmail: z.string(),
+        senderName: z.string().optional(),
+        messageText: z.string().optional(),
+      },
+      annotations: { readOnlyHint: true },
+    },
+    async (a) => {
+      const { evaluateRecruiterThreat } = await import("@job-scout/core");
+      try {
+        const report = await evaluateRecruiterThreat({
+          domainOrEmail: a.domainOrEmail,
+          senderName: a.senderName,
+          messageText: a.messageText,
+        });
+        return text(report);
+      } catch (e) {
+        return errText(e);
+      }
+    },
+  );
+
+  server.registerTool(
+    "list_linkedin_dms",
+    {
+      title: "List LinkedIn DMs",
+      description:
+        "Inspect active LinkedIn messaging threads and recent messages from the local desktop session, with automatic threat screening on inbound senders.",
+      inputSchema: {
+        autoScreenThreats: z.boolean().optional(),
+      },
+      annotations: { readOnlyHint: true },
+    },
+    async (a) => {
+      const { readLinkedInMessages } = await import("@job-scout/core");
+      try {
+        const feed = await readLinkedInMessages({ autoScreenThreats: a.autoScreenThreats });
+        return text(feed);
+      } catch (e) {
+        return errText(e);
+      }
+    },
+  );
+
   return server;
 }
 

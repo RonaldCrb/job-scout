@@ -35,3 +35,5 @@ export * from "./whatsapp-inbox.js";
 export * from "./triage-refresh.js";
 export * from "./decisions.js";
 export * from "./decision-events.js";
+export * from "./threat-intel.js";
+export * from "./linkedin.js";
